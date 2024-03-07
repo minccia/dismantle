@@ -16,18 +16,8 @@ _start:
     mov ecx, 0            ;
     INT 80h               ;
 
-    CMP eax, 0            ;
-    JNS open_success
-
-open_failure:
-    MOV eax, 4            ; sys_write
-    MOV ebx, 1            ; stdout
-    MOV ecx, open_failure_msg
-    MOV edx, open_failure_msg_len
-    INT 80h
-
-    MOV ecx, 1            ; status code
-    JMP end
+    CMP eax, 0            ; Jump if open
+    JS open_failure       ; fails (negative fd)
 
 open_success:
     MOV ebx, eax          ; sys_open file descriptor
@@ -42,6 +32,16 @@ open_success:
     INT 80h
 
     MOV ecx, 0
+    JMP end
+
+open_failure:
+    MOV eax, 4            ; sys_write
+    MOV ebx, 1            ; stdout
+    MOV ecx, open_failure_msg
+    MOV edx, open_failure_msg_len
+    INT 80h
+
+    MOV ecx, 1            ; status code
 
 end:
     MOV eax, 1            ; sys_exit
